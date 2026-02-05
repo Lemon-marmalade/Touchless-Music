@@ -1,5 +1,6 @@
 import cv2
 import csv
+import os
 import mediapipe as mp
 
 from mediapipe.tasks import python
@@ -15,23 +16,32 @@ VisionRunningMode = vision.RunningMode
 options = HandLandmarkerOptions(
     base_options=BaseOptions(model_asset_path="hand_landmarker.task"), # Location to store model
     running_mode=VisionRunningMode.VIDEO, # Video mode
-    num_hands=2 # Only detect one hand for now
+    num_hands=1 # Only detect one hand for now
 )
 # Create detector object
 landmarker = HandLandmarker.create_from_options(options)
 
-cap = cv2.VideoCapture(0) # Start webcam
+cap = cv2.VideoCapture(0) # Start webcam (default webcam)
 frame_id = 0 # MediaPipe needs each frame to have a unique increasing timestamp
 
-# -- Dataset storage --
+# -- Dataset storage (dynamic appending) --
 
-data = []
+filename = "hands_dataset.csv"
+
+# create file if it doesn't exist
+if not os.path.exists(filename):
+    open(filename, "w").close()
+
+# counters
+open_count = 0
+closed_count = 0
+
 
 # Instructions
 print("\nControls:")
 print("  o = label OPEN")
 print("  c = label CLOSED")
-print("  q = quit\n")
+print("  q = quit/finish\n")
 
 
 # -- Main loop --
@@ -66,32 +76,49 @@ while True:
             x = int(lm.x * w)
             y = int(lm.y * h)
             cv2.circle(frame, (x, y), 3, (0, 255, 0), -1) # Draw marker
+    
+    # Show the frame with counters of samples
 
+    total = open_count + closed_count
 
-    cv2.imshow("Data Collector", frame) # Show the frame
+    cv2.putText(frame, f"OPEN: {open_count}", (20, 40),
+                cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0,255,0), 2) # text in green
+
+    cv2.putText(frame, f"CLOSED: {closed_count}", (20, 70),
+                cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0,255,0), 2)
+
+    cv2.putText(frame, f"TOTAL: {total}", (20, 100),
+                cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0,255,0), 2)
+
+    cv2.imshow("Data Collector", frame)
 
     key = cv2.waitKey(1) & 0xFF # Escape method is esc key
 
     # Only save if a hand is detected
     if features:
         if key == ord('o'):
-            data.append(features + [0])
+            with open(filename, "a", newline="") as f: # append to dataset
+                writer = csv.writer(f)
+                writer.writerow(features + [0])  # label 0
+            open_count += 1
             print("labelled as OPEN")
 
         if key == ord('c'):
-            data.append(features + [1])
+            with open(filename, "a", newline="") as f:
+                writer = csv.writer(f)
+                writer.writerow(features + [1])  # label 1
+            closed_count += 1
             print("labelled as CLOSED")
 
     if key == ord('q'):
         break
 
-# -- Save CSV --
-
-with open("hands_dataset.csv", "w", newline="") as f:
-    writer = csv.writer(f)
-    writer.writerows(data)
-
-print(f"\nSaved {len(data)} samples to hands_dataset.csv")
+# -- Cleanup --
 
 cap.release()
 cv2.destroyAllWindows()
+
+print(f"\nFinished.")
+print(f"OPEN: {open_count}")
+print(f"CLOSED: {closed_count}")
+print(f"TOTAL: {open_count + closed_count}")
