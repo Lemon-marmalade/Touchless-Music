@@ -26,7 +26,7 @@ frame_id = 0 # MediaPipe needs each frame to have a unique increasing timestamp
 
 # -- Dataset storage (dynamic appending) --
 
-filename = "hands_dataset.csv"
+filename = "RH_dataset.csv"
 
 # create file if it doesn't exist
 if not os.path.exists(filename):
@@ -90,9 +90,9 @@ while True:
     cv2.putText(frame, f"TOTAL: {total}", (20, 100),
                 cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0,255,0), 2)
 
-    cv2.imshow("Data Collector", frame)
+    cv2.imshow("Right Hand Data Collector", frame)
 
-    key = cv2.waitKey(1) & 0xFF # Escape method is esc key
+    key = cv2.waitKey(1) & 0xFF # only get last byte of key value (just in case)
 
     # Only save if a hand is detected
     if features:
@@ -101,14 +101,14 @@ while True:
                 writer = csv.writer(f)
                 writer.writerow(features + [0])  # label 0
             open_count += 1
-            print("labelled as OPEN")
+            print("Labelled as OPEN")
 
-        if key == ord('c'):
+        elif key == ord('c'):
             with open(filename, "a", newline="") as f:
                 writer = csv.writer(f)
                 writer.writerow(features + [1])  # label 1
             closed_count += 1
-            print("labelled as CLOSED")
+            print("Labelled as CLOSED")
 
     if key == ord('q'):
         break
