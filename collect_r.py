@@ -49,6 +49,8 @@ print("  q = quit/finish\n")
 while True:
 
     ret, frame = cap.read() # Read a frame from webcam
+    frame = cv2.flip(frame, 1)   # mirror frame
+
     if not ret:
         break
     # Convert frame to MediaPipe image
