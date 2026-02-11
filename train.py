@@ -38,7 +38,11 @@ class HandNet(nn.Module): # subclass nn.Module
 # -- Training Loop --
 
 dataset = HandDataset("RH_dataset.csv") # try with right hand data for now
+print("dataset loaded")
+
+print("creating dataloader")
 loader = DataLoader(dataset, batch_size=64, shuffle=True)
+print("dataloader ready")
 
 model = HandNet(num_classes=7)
 
