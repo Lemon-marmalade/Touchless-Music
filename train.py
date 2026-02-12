@@ -44,7 +44,7 @@ print("creating dataloader")
 loader = DataLoader(dataset, batch_size=64, shuffle=True)
 print("dataloader ready")
 
-model = HandNet(num_classes=7)
+model = HandNet(num_classes=2) # CHANGE THIS FOR EACH HAND
 
 criterion = nn.CrossEntropyLoss() # loss fn
 optimizer = torch.optim.Adam(model.parameters(), lr=0.001) # weight correction (Adaptive Moment Estimation)
@@ -64,4 +64,4 @@ for epoch in range(30):
 
     print(f"Epoch {epoch}: {total_loss:.4f}")
 
-torch.save(model.state_dict(), "RH_only_model.pt")
+torch.save(model.state_dict(), "RH_model.pt")
