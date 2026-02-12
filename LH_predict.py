@@ -76,18 +76,19 @@ while True:
             cv2.circle(frame, (x, y), 3, (0, 255, 0), -1) # Draw marker
 
         # Recognize hand position
-        model = HandNet(2) # 2 possible labels
-        model.load_state_dict(torch.load("RH_model.pt"))
+        model = HandNet(7) # 7 possible labels
+        model.load_state_dict(torch.load("LH_model.pt"))
         model.eval()
 
         with torch.no_grad():
             features = torch.tensor(features, dtype=torch.float32)
             pred = model(features)
             label = pred.argmax().item()
-        gesture = ["OPEN", "CLOSED"]
+
+        gesture = ["DO", "RE", "MI", "FA", "SO", "LA", "TI"]
         cv2.putText(frame, f"Hand is: {gesture[label]}", (20, 40), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0,255,0), 2)
 
-    cv2.imshow("Right Hand Predict", frame)
+    cv2.imshow("Left Hand Predict", frame)
 
     key = cv2.waitKey(1) & 0xFF # only get last byte of key value (just in case)
     if key == ord('q'):
