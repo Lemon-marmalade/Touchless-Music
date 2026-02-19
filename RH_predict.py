@@ -85,7 +85,7 @@ while True:
             pred = model(features)
             label = pred.argmax().item()
         gesture = ["OPEN", "CLOSED"]
-        cv2.putText(frame, f"Hand is: {gesture[label]}", (20, 40), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0,255,0), 2)
+        cv2.putText(frame, f"Hand is: {gesture[label]}", (1710, 40), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0,255,0), 2)
 
     cv2.imshow("Right Hand Predict", frame)
 
