@@ -42,7 +42,7 @@ class HandNet(nn.Module):
         return self.net(x)
 # -- Load models --
 modell = HandNet(7)
-modell.load_state_dict(torch.load("LH_model.pt"))
+modell.load_state_dict(torch.load("LH_model2.pt"))
 modell.eval()
 
 modelr = HandNet(2)
@@ -55,6 +55,7 @@ while True:
 
     if not ret:
         break
+    frame = cv2.flip(frame, 1)   # must fip first, because that's how my model was trained
     # Convert frame to MediaPipe image
     mp_image = mp.Image(image_format=mp.ImageFormat.SRGB, data=frame)
     # Run hand detection
@@ -62,7 +63,6 @@ while True:
     result = landmarker.detect_for_video(mp_image, frame_id)
     frame_id += 1
 
-    display_frame = cv2.flip(frame, 1)   # create separate frame for mirrored version
 
     featuresr = featuresl = None
 
@@ -76,16 +76,16 @@ while True:
             for lm in hand_landmarks:
                 features += [lm.x, lm.y, lm.z]
 
-                h, w, _ = display_frame.shape
-                x = int((1 - lm.x) * w)   # must mirror coordinates manually
+                h, w, _ = frame.shape
+                x = int(lm.x * w)
                 y = int(lm.y * h)
 
-                if handedness == "Left":
-                    cv2.circle(display_frame, (x, y), 3, (0, 255, 0), -1) # Huh... color format is bgr
+                if handedness == "Right": # opposite since display is mirrored
+                    cv2.circle(frame, (x, y), 3, (0, 255, 0), -1) # Huh... color format is bgr
                 else:
-                    cv2.circle(display_frame, (x, y), 3, (0, 255, 255), -1)
+                    cv2.circle(frame, (x, y), 3, (0, 255, 255), -1)
 
-            if handedness == "Left":
+            if handedness == "Right": # opposite since display is mirrored
                 featuresl = features
             else:
                 featuresr = features
@@ -99,7 +99,7 @@ while True:
             labell = predl.argmax().item()
 
         gesturel = ["DO", "RE", "MI", "FA", "SO", "LA", "TI"]
-        cv2.putText(display_frame, f"Left Hand: {gesturel[labell]}",
+        cv2.putText(frame, f"Left Hand: {gesturel[labell]}",
                     (20, 40), cv2.FONT_HERSHEY_SIMPLEX,
                     0.7, (0,255,0), 2)
 
@@ -113,11 +113,11 @@ while True:
             labelr = predr.argmax().item()
 
         gesturer = ["OPEN", "CLOSED"]
-        cv2.putText(display_frame, f"Right Hand: {gesturer[labelr]}",
+        cv2.putText(frame, f"Right Hand: {gesturer[labelr]}",
                     (1680, 40), cv2.FONT_HERSHEY_SIMPLEX,
                     0.7, (0,255,255), 2)
     
-    cv2.imshow("Hand Prediction", display_frame)
+    cv2.imshow("Hand Prediction", frame)
 
     key = cv2.waitKey(1) & 0xFF # only get last byte of key value (just in case)
     if key == ord('q'):
