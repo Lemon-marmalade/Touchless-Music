@@ -26,7 +26,7 @@ frame_id = 0 # MediaPipe needs each frame to have a unique increasing timestamp
 
 # -- Dataset storage (dynamic appending) --
 
-filename = "LH_dataset.csv"
+filename = "LH_dataset2.csv"
 
 # create file if it doesn't exist
 if not os.path.exists(filename):

@@ -77,7 +77,7 @@ while True:
 
         # Recognize hand position
         model = HandNet(7) # 7 possible labels
-        model.load_state_dict(torch.load("LH_model.pt"))
+        model.load_state_dict(torch.load("LH_model2.pt"))
         model.eval()
 
         with torch.no_grad():

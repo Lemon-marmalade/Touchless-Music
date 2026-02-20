@@ -37,7 +37,7 @@ class HandNet(nn.Module): # subclass nn.Module
 
 # -- Training Loop --
 
-dataset = HandDataset("LH_dataset.csv")
+dataset = HandDataset("LH_dataset2.csv")
 print("dataset loaded")
 
 print("creating dataloader")
@@ -64,4 +64,4 @@ for epoch in range(30):
 
     print(f"Epoch {epoch}: {total_loss:.4f}")
 
-torch.save(model.state_dict(), "LH_model.pt")
+torch.save(model.state_dict(), "LH_model2.pt")
