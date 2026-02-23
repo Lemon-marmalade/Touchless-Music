@@ -7,6 +7,20 @@ import mediapipe as mp
 from mediapipe.tasks import python
 from mediapipe.tasks.python import vision
 
+import serial
+import time
+
+# -- Arduino communication -- 
+
+SERIAL_PORT = "/dev/cu.usbmodem1101"
+BAUD_RATE = 9600
+
+def send_to_arduino(ser, rhand, lhand):
+    # Format how Arduino code accepts inputs
+    message = f"{rhand} {lhand}\n"
+    ser.write(message.encode())
+    time.sleep(0.1)
+
 # -- MediaPipe setup --
 # Aliases
 BaseOptions = python.BaseOptions
@@ -48,6 +62,9 @@ modell.eval()
 modelr = HandNet(2)
 modelr.load_state_dict(torch.load("RH_model.pt"))
 modelr.eval()
+
+ser = serial.Serial(SERIAL_PORT, BAUD_RATE) # Create serial object
+
 # -- Main Loop --
 while True:
 
@@ -89,6 +106,8 @@ while True:
                 featuresl = features
             else:
                 featuresr = features
+    rhand = None
+    lhand = None
 
     # LEFT HAND
     if featuresl is not None:
@@ -97,7 +116,7 @@ while True:
         with torch.no_grad():
             predl = modell(featuresl)
             labell = predl.argmax().item()
-
+        lhand = labell
         gesturel = ["DO", "RE", "MI", "FA", "SO", "LA", "TI"]
         cv2.putText(frame, f"Left Hand: {gesturel[labell]}",
                     (20, 40), cv2.FONT_HERSHEY_SIMPLEX,
@@ -111,11 +130,13 @@ while True:
         with torch.no_grad():
             predr = modelr(featuresr)
             labelr = predr.argmax().item()
-
+        rhand = labelr
         gesturer = ["OPEN", "CLOSED"]
         cv2.putText(frame, f"Right Hand: {gesturer[labelr]}",
                     (1680, 40), cv2.FONT_HERSHEY_SIMPLEX,
                     0.7, (0,255,255), 2)
+        
+    send_to_arduino(ser, rhand, lhand)
     
     cv2.imshow("Hand Prediction", frame)
 
