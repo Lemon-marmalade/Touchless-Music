@@ -12,7 +12,7 @@ import time
 
 # -- Arduino communication -- 
 
-SERIAL_PORT = "/dev/cu.usbmodem1101"
+SERIAL_PORT = "/dev/cu.usbmodem101"
 BAUD_RATE = 9600
 
 def send_to_arduino(ser, rhand, lhand):
@@ -106,8 +106,8 @@ while True:
                 featuresl = features
             else:
                 featuresr = features
-    rhand = None
-    lhand = None
+    rhand = -1
+    lhand = -1
 
     # LEFT HAND
     if featuresl is not None:
@@ -136,7 +136,7 @@ while True:
                     (1680, 40), cv2.FONT_HERSHEY_SIMPLEX,
                     0.7, (0,255,255), 2)
         
-    send_to_arduino(ser, rhand, lhand)
+    send_to_arduino(ser, int(rhand), int(lhand))
     
     cv2.imshow("Hand Prediction", frame)
 
