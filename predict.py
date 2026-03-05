@@ -13,13 +13,18 @@ import time
 # -- Arduino communication -- 
 
 SERIAL_PORT = "/dev/cu.usbmodem101"
-BAUD_RATE = 9600
+BAUD_RATE = 115200
 
 def send_to_arduino(ser, rhand, lhand):
     # Format how Arduino code accepts inputs
-    message = f"{rhand} {lhand}\n"
-    ser.write(message.encode())
-    time.sleep(0.1)
+    if ser is None:
+        return
+    msg = f"{rhand} {lhand}\n"
+    try:
+        ser.write(msg.encode())
+        # do NOT sleep here
+    except Exception as e:
+        print("Serial write error:", e)
 
 # -- MediaPipe setup --
 # Aliases
