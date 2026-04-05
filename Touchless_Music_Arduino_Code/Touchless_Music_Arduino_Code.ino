@@ -82,7 +82,7 @@ void stopBuzzer2()
   digitalWrite(BUZZER2, LOW);
 }
 
-int idx = -1, lastIdx = -1;
+int idx = -1, lastIdx = -1, lastL = -2; // lastL=-2 so first update always fires (-2 for never set, -1 explicitly stopped)
 
 void setup() 
 {
@@ -124,7 +124,7 @@ void loop()
     {
       float distance = echo * 0.034 / 2.0;
       distance = constrain(distance, 0, 25);
-      idx = map(distance, 2, 25, 0, 12);
+      idx = map(distance, 8, 25, 0, 12);
 
       if (idx != lastIdx) 
       {
@@ -140,14 +140,20 @@ void loop()
   }
 
   // -- Left Hand (gesture -> scale2) --
-  if (newL >= 0 && newL <= 6) 
+  if (newL >= 0 && newL <= 6)
   {
-    startBuzzer2_idx(newL);
-  } 
-  else 
-  {
-    stopBuzzer2();
+    if (newL != lastL)
+    {
+      startBuzzer2_idx(newL);
+      lastL = newL;
+    }
   }
-
-  delay(10);
+  else
+  {
+    if (lastL != -1) // only stop if it was playing
+    {
+      stopBuzzer2();
+      lastL = -1;
+    }
+  }
 }
